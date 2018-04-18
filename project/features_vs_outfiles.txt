@@ -1,0 +1,332 @@
+===================================
+vanilla:
+classification report:
+             precision    recall  f1-score   support
+
+          D       0.82      0.19      0.31       947
+          O       0.89      0.99      0.94     10978
+          T       0.71      0.12      0.20       720
+
+avg / total       0.87      0.88      0.85     12645
+
+acc = 0.8833531039936734
+===================================
+classification report:
+             precision    recall  f1-score   support
+
+          D       0.71      0.41      0.52       947
+          O       0.91      0.98      0.94     10978
+          T       0.66      0.26      0.37       720
+
+avg / total       0.88      0.90      0.88     12645
+
+stemmer = SnowballStemmer('english')
+lmtzr = WordNetLemmatizer() 
+ 
+def ner_features(tokens, index, history=None):
+    """
+    tokens  = a POS-tagged sentence [(w1, t1), ...]
+    index   = the index of the token we want to extract features for
+    history = the previous predicted IOB tags
+    """
+
+    # Pad the sequence with placeholders
+    tokens = [('__START2__', '__START2__'), ('__START1__', '__START1__')] + list(tokens) + [('__END1__', '__END1__'), ('__END2__', '__END2__')]
+    #history = ['__START2__', '__START1__'] + list(history)
+    useful_pos = ['NN','JJ','NNS','NNP','CC','IN'
+                 #for O:
+                 #'IN','DT','CC','CD','VBN','VBD'
+                 ]
+
+
+    # shift the index with 2, to accommodate the padding
+    index += 2
+
+    word, pos = tokens[index]
+    #    pos = pos if pos in useful_pos else 'Other'
+    prevword, prevpos = tokens[index - 1]
+    prevprevword, prevprevpos = tokens[index - 2]
+    nextword, nextpos = tokens[index + 1]
+    nextnextword, nextnextpos = tokens[index + 2]
+    #previob = history[-1]
+    #prevpreviob = history[-2]
+    
+    mesh_categories = get_mesh_categories(word)
+    
+    
+    features= [
+        pos,
+        shape(word),
+        lmtzr.lemmatize(word),
+
+        nextword,
+        nextpos,
+        lmtzr.lemmatize(nextword),
+        shape(nextword),
+
+        nextnextword,
+        nextnextpos,
+        lmtzr.lemmatize(nextnextword),
+        shape(nextnextword),
+
+        prevword,
+        prevpos,
+        lmtzr.lemmatize(prevword),
+        shape(prevword),
+
+        prevprevword,
+        prevprevpos,
+        lmtzr.lemmatize(prevprevword),
+        shape(prevprevword),
+    ]
+    
+    features = features + mesh_categories
+    return features
+===================================
+id = 2
+features : pos
+classification report:
+             precision    recall  f1-score   support
+
+          D       0.67      0.33      0.44       947
+          O       0.90      0.98      0.94     10978
+          T       0.61      0.19      0.29       720
+
+avg / total       0.87      0.89      0.86     12645
+
+===================================
+id = 3
+features : shape
+classification report:
+             precision    recall  f1-score   support
+
+          D       0.63      0.27      0.37       947
+          O       0.89      0.99      0.94     10978
+          T       0.69      0.13      0.23       720
+
+avg / total       0.86      0.88      0.85     12645
+
+===================================
+id =4
+features: lemma
+classification report:
+             precision    recall  f1-score   support
+
+          D       0.68      0.30      0.41       947
+          O       0.90      0.99      0.94     10978
+          T       0.70      0.16      0.26       720
+
+avg / total       0.87      0.89      0.86     12645
+===================================
+id = 5
+features : next word
+classification report:
+             precision    recall  f1-score   support
+
+          D       0.77      0.32      0.45       947
+          O       0.90      0.99      0.94     10978
+          T       0.81      0.19      0.30       720
+
+avg / total       0.88      0.89      0.87     12645
+===================================
+id = 6
+features : previous word
+classification report:
+             precision    recall  f1-score   support
+
+          D       0.71      0.39      0.51       947
+          O       0.91      0.98      0.95     10978
+          T       0.72      0.25      0.37       720
+
+avg / total       0.88      0.90      0.88     12645
+
+===================================
+id = 7
+features : next next word
+
+classification report:
+             precision    recall  f1-score   support
+
+          D       0.72      0.37      0.49       947
+          O       0.91      0.98      0.94     10978
+          T       0.68      0.29      0.40       720
+
+avg / total       0.88      0.89      0.88     12645
+===================================
+id =8
+features : pre prev word
+classification report:
+             precision    recall  f1-score   support
+
+          D       0.70      0.36      0.47       947
+          O       0.91      0.98      0.94     10978
+          T       0.64      0.26      0.37       720
+
+avg / total       0.88      0.89      0.87     12645
+
+===================================
+id = 9
+features : mesh
+classification report:
+             precision    recall  f1-score   support
+
+          D       0.71      0.41      0.52       947
+          O       0.91      0.98      0.94     10978
+          T       0.66      0.26      0.37       720
+
+avg / total       0.88      0.90      0.88     12645
+
+===================================
+id: 10
+features : POS,lemma,next,prev words
+classification report:
+             precision    recall  f1-score   support
+
+          D       0.77      0.46      0.57       947
+          O       0.92      0.98      0.95     10978
+          T       0.67      0.31      0.42       720
+
+avg / total       0.89      0.90      0.89     12645
+===================================
+id: 11
+features : POS,lemma,next,prev words,mesh
+classification report:
+             precision    recall  f1-score   support
+
+          D       0.75      0.45      0.56       947
+          O       0.91      0.99      0.95     10978
+          T       0.79      0.26      0.39       720
+
+avg / total       0.89      0.90      0.89     12645
+===================================
+id : 12
+features: only mesh
+classification report:
+             precision    recall  f1-score   support
+
+          D       0.78      0.16      0.27       947
+          O       0.88      1.00      0.94     10978
+          T       0.67      0.06      0.12       720
+
+avg / total       0.86      0.88      0.84     12645
+===================================
+id : 13
+features: only 50d glove float
+classification report:
+             precision    recall  f1-score   support
+
+          D       0.77      0.60      0.68       947
+          O       0.94      0.97      0.95     10978
+          T       0.67      0.51      0.58       720
+
+avg / total       0.91      0.92      0.91     12645
+===================================
+id : 14
+features: only 100d glove float
+classification report:
+             precision    recall  f1-score   support
+
+          D       0.75      0.61      0.67       947
+          O       0.94      0.97      0.95     10978
+          T       0.68      0.52      0.59       720
+
+avg / total       0.91      0.92      0.91     12645
+===================================
+id :15
+features : only prefixes and suffixes
+classification report:
+             precision    recall  f1-score   support
+
+          D       0.75      0.61      0.67       947
+          O       0.94      0.97      0.95     10978
+          T       0.68      0.52      0.59       720
+
+avg / total       0.91      0.92      0.91     12645
+
+===================================
+id : 16
+features : word,lemma,next,prev, affixes
+classification report:
+             precision    recall  f1-score   support
+
+          D       0.75      0.61      0.67       947
+          O       0.94      0.97      0.95     10978
+          T       0.68      0.52      0.59       720
+
+avg / total       0.91      0.92      0.91     12645
+
+===================================
+id :17
+features : only prefixes and suffixes . next and prev words
+classification report:
+             precision    recall  f1-score   support
+
+          D       0.74      0.60      0.66       947
+          O       0.93      0.97      0.95     10978
+          T       0.62      0.45      0.52       720
+
+avg / total       0.90      0.91      0.90     12645
+===================================
+id : 18
+features : word,lemma,next,prev, affixes , glove50
+classification report:
+             precision    recall  f1-score   support
+
+          D       0.79      0.68      0.73       947
+          O       0.94      0.97      0.96     10978
+          T       0.72      0.52      0.60       720
+
+avg / total       0.92      0.93      0.92     12645
+===================================
+id : 19
+features : word,lemma,next,prev, affixes , glove50 , mesh catgories
+classification report:
+             precision    recall  f1-score   support
+
+          D       0.81      0.66      0.73       947
+          O       0.94      0.98      0.96     10978
+          T       0.74      0.52      0.61       720
+
+avg / total       0.92      0.93      0.92     12645
+===================================
+id : 20
+features : word,lemma,next,prev, affixes , glove50 , mesh all catgories BOW
+classification report:
+             precision    recall  f1-score   support
+
+          D       0.79      0.67      0.73       947
+          O       0.94      0.97      0.96     10978
+          T       0.74      0.49      0.59       720
+
+avg / total       0.92      0.92      0.92     12645
+===================================
+id : 21
+features : word,lemma,next,prev, affixes , glove50 , mesh ABCDEJN catgories BOW
+classification report:
+             precision    recall  f1-score   support
+
+          D       0.80      0.69      0.74       947
+          O       0.94      0.97      0.96     10978
+          T       0.74      0.50      0.59       720
+
+avg / total       0.92      0.93      0.92     12645
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
+===================================
